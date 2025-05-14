@@ -96,7 +96,42 @@ def recibir_ubicacion():
     except Exception as e:
         print("❌ Error al conectar con Supabase:", str(e))
         return jsonify({"error": "Error al conectar con Supabase"}), 500
+# ... tus imports y variables de entorno arriba
 
+@app.route('/')
+def home():
+    return "✅ Servidor Flask en Heroku funcionando correctamente 🚀", 200
+
+@app.route('/ubicacion', methods=['POST'])
+def recibir_ubicacion():
+    # ... tu código actual que guarda en Supabase
+
+# 👇 Pegar el nuevo endpoint acá
+ @app.route('/ultima-ubicacion', methods=['GET'])
+ def ultima_ubicacion():
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    try:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/ubicaciones?order=timestamp.desc&limit=1",
+            headers=headers
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            if data:
+                return jsonify(data[0]), 200
+            else:
+                return jsonify({"mensaje": "Sin ubicaciones registradas"}), 204
+        else:
+            return jsonify({"error": "No se pudo obtener la última ubicación"}), 500
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)), debug=True)
